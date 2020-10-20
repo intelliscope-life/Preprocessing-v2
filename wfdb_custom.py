@@ -107,6 +107,60 @@ def plot_signal(s,e,peaks,signal, sig_len, n_sig, fs, time_units, sig_style, axe
             
             
             axes[ch].scatter(x, y,color='red',s=15)
+           
+def custom_plot_signal(s,e,peaks,signal,figsize):
+    """
+    Plot signal channels.
+    Parameters
+    ----------
+    signal : ndarray
+        Tranformed expanded signal into uniform signal.
+    sig_len : int
+        The signal length (per channel) of the dat file.
+    n_sig : int
+        The number of signals contained in the dat file.
+    fs : float
+        The sampling frequency of the record.
+    time_units : str
+        The x axis unit. Allowed options are: 'samples', 'seconds', 'minutes',
+        and 'hours'.
+    sig_style : list
+        A list of strings, specifying the style of the matplotlib plot
+        for each signal channel. The list length should match the number
+        of signal channels. If the list has a length of 1, the style
+        will be used for all channels.
+    axes : list
+        The information needed for each subplot.
+    Returns
+    -------
+    N/A
+    """
+    # Extend signal style if necessary
+    sig_len = len(signal[0])
+    n_sig   = len(signal)
+    fs      = 2000
+    time_units ='samples'
+    sig_style = []
+    
+    fig, axes = create_figure(2, figsize)
+    
+    if time_units == 'samples':
+        t = np.linspace(0, sig_len-1, sig_len)
+    else:
+        downsample_factor = {'seconds':fs, 'minutes':fs * 60,
+                             'hours':fs * 3600}
+        t = np.linspace(0, sig_len-1, sig_len) / downsample_factor[time_units]
+
+
+    for ch in range(n_sig):
+        axes[ch].plot(t[s:e], signal[ch][s:e], zorder=3)
+        x = peaks[ch][ peaks[ch] > s]
+        x = x[x<e]
+        y = signal[ch][x]
+        
+        axes[ch].scatter(x, y,color='red',s=15)
+           
+    plt.show()
             
 
 def get_wfdb_plot_items(record, annotation, plot_sym):
